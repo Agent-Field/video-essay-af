@@ -1,0 +1,64 @@
+services:
+  control-plane:
+    image: agentfield/control-plane:latest
+    environment:
+      AGENTFIELD_STORAGE_MODE: local
+      AGENTFIELD_HTTP_ADDR: 0.0.0.0:8080
+    ports:
+      - "${AGENTFIELD_HTTP_PORT:-8080}:8080"
+    volumes:
+      - agentfield-data:/data
+    # NOTE: agentfield/control-plane:latest is a distroless image — no sh, no wget, no curl.
+    # A CMD-based healthcheck cannot run inside the container. The agent SDK retries
+    # connection to the control plane on startup, so service_started is sufficient.
+
+  video-essay-af:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      AGENTFIELD_SERVER: http://control-plane:8080
+      AGENT_CALLBACK_URL: http://video-essay-af:8001
+      AGENT_NODE_ID: ${AGENT_NODE_ID:-video-essay-af}
+      # --- provider keys (OpenRouter is required: reasoning + TTS + AForge) ---
+      OPENROUTER_API_KEY: ${OPENROUTER_API_KEY:-}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GOOGLE_API_KEY: ${GOOGLE_API_KEY:-}
+      AGENTFIELD_OPENROUTER_SITE_URL: ${AGENTFIELD_OPENROUTER_SITE_URL:-https://agentfield.ai}
+      AGENTFIELD_OPENROUTER_APP_NAME: ${AGENTFIELD_OPENROUTER_APP_NAME:-video-essay-af}
+      # --- models ---
+      AI_MODEL: ${AI_MODEL:-openrouter/deepseek/deepseek-v4-flash}
+      VEA_TTS_MODEL: ${VEA_TTS_MODEL:-google/gemini-3.1-flash-tts-preview}
+      VEA_TTS_SPEED: ${VEA_TTS_SPEED:-1.12}
+      VEA_HARNESS_MODEL: ${VEA_HARNESS_MODEL:-}
+      AFORGE_MODEL: ${AFORGE_MODEL:-}
+      # --- optional stock-footage / search keys (Wikimedia Commons + DuckDuckGo/Wikipedia work without any) ---
+      PEXELS_API_KEY: ${PEXELS_API_KEY:-}
+      PIXABAY_API_KEY: ${PIXABAY_API_KEY:-}
+      TAVILY_API_KEY: ${TAVILY_API_KEY:-}
+      BRAVE_API_KEY: ${BRAVE_API_KEY:-}
+      SERPER_API_KEY: ${SERPER_API_KEY:-}
+      # --- behaviour ---
+      VEA_USE_HARNESS: ${VEA_USE_HARNESS:-true}
+      VEA_HARNESS_MAX_TURNS: ${VEA_HARNESS_MAX_TURNS:-40}
+      AGENTFIELD_HARNESS_TIMEOUT_SECONDS: ${AGENTFIELD_HARNESS_TIMEOUT_SECONDS:-1500}
+      VEA_EDIT_ROUNDS: ${VEA_EDIT_ROUNDS:-2}
+      VEA_VERIFY_CLAIMS: ${VEA_VERIFY_CLAIMS:-6}
+      VEA_MAX_LANES: ${VEA_MAX_LANES:-6}
+      VEA_OUTPUT_DIR: /app/output
+      AGENTFIELD_LLM_CALL_TIMEOUT: ${AGENTFIELD_LLM_CALL_TIMEOUT:-300}
+      PORT: ${PORT:-8001}
+    ports:
+      - "${AGENT_NODE_PORT:-8001}:8001"
+    depends_on:
+      control-plane:
+        condition: service_started
+    volumes:
+      # Finished essays, scripts, research dossiers and the harness workspaces
+      # survive container rebuilds.
+      - ./output:/app/output
+    restart: on-failure
+
+volumes:
+  agentfield-data:

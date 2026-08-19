@@ -1,0 +1,21 @@
+config_version: v1
+name: "video-essay-af"
+version: 1.0.0
+description: "Prompt → multi-agent research → script → editorial → free stock footage + narration → AForge-cut video essay."
+author: "Abir Abbas"
+language: python
+entrypoint:
+  start: python main.py
+  healthcheck: /health
+agent_node:
+  node_id: "video-essay-af"
+  default_port: 8001
+user_environment:
+  required:
+    - OPENROUTER_API_KEY
+  optional:
+    - PEXELS_API_KEY
+    - PIXABAY_API_KEY
+    - TAVILY_API_KEY
+    - AI_MODEL
+    - VEA_HARNESS_MODEL
