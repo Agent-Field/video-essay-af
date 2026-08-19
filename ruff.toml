@@ -1,0 +1,9 @@
+# Lint config used by CI (.github/workflows/ci.yml) and locally: `ruff check .`
+target-version = "py311"
+line-length = 140
+extend-exclude = ["output"]
+
+[lint]
+# Errors, pyflakes, warnings, bugbear, pyupgrade. Prompt strings make E501 noise.
+select = ["E", "F", "W", "B", "UP"]
+ignore = ["E501", "UP017"]  # UP017: keep datetime.timezone.utc (3.10-compatible)
