@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN curl -sSf https://agentfield.ai/get | AGENTFIELD_HOME=/opt/agentfield bash \
     && ln -sf /opt/agentfield/bin/aforge /usr/local/bin/aforge \
     && aforge version
+# Stay on aforge on purpose until this product's separate CodeAF migration.
 ENV AFORGE_BIN=/opt/agentfield/bin/aforge \
     AFORGE_HOME=/opt/agentfield/aforge-home \
     PATH="/opt/agentfield/bin:${PATH}"
