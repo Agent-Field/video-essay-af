@@ -36,6 +36,11 @@ cp .env.example .env          # paste OPENROUTER_API_KEY (reasoning + Gemini TTS
 docker compose up --build     # control plane :8080, agent :8001
 ```
 
+For host runs, set `AFORGE_BIN` in `.env` to the absolute path of your `aforge` binary;
+`main.py` loads `.env` before the SDK starts. Without it, agentfield 0.1.143 and later run
+CodeAF for `aforge` requests. The Docker image already sets it. This product stays on
+AForge on purpose until its own CodeAF migration.
+
 Optional free keys that noticeably improve B-roll / research: `PEXELS_API_KEY`, `PIXABAY_API_KEY`, `TAVILY_API_KEY`. Without them footage comes from Wikimedia Commons (keyless) plus generated text cards, and search uses DuckDuckGo + Wikipedia.
 
 ## 🌐 Open the UI
